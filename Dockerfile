@@ -13,7 +13,7 @@ COPY backend/pom.xml ./
 RUN mvn dependency:go-offline
 COPY backend ./
 COPY --from=frontend-builder /app/frontend/build src/main/resources/static
-RUN mvn clean package -DskipTests
+RUN mvn clean package spring-boot:repackage -DskipTests
 
 # 3) Slim runtime image
 FROM eclipse-temurin:8-jre-alpine
