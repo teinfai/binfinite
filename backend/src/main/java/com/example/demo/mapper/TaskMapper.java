@@ -13,7 +13,7 @@ public interface TaskMapper {
     @Mappings({
             @Mapping(target = "title", source = "title"),
             @Mapping(target = "description", source = "description"),
-            @Mapping(target = "taskStatus", source = "taskStatus")
+            @Mapping(target = "completed", source = "completed")
     })
     Task dtoToEntity(TaskDto dto);
 
@@ -21,7 +21,7 @@ public interface TaskMapper {
             @Mapping(target = "id", source = "id"),
             @Mapping(target = "title", source = "title"),
             @Mapping(target = "description", source = "description"),
-            @Mapping(target = "taskStatus", source = "taskStatus")
+            @Mapping(target = "completed", source = "completed")
     })
     TaskVo entityToVo(Task entity);
 

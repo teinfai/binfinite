@@ -21,7 +21,7 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping("/createTask")
-    @ApiOperation(value = "Create a new user")
+    @ApiOperation(value = "Create a new task")
     public ResponseEntity<?> createtask(@Valid @RequestBody TaskDto taskDto) {
         try {
             return ResponseEntity.ok(taskService.createTask(taskDto));
@@ -40,13 +40,13 @@ public class TaskController {
         return ResponseEntity.ok(vo);
     }
 
-    @GetMapping
+    @GetMapping("/listAll")
     public ResponseEntity<List<TaskVo>> listAll() {
         List<TaskVo> all = taskService.getAllTasks();
         return ResponseEntity.ok(all);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("updateTask/{id}")
     public ResponseEntity<TaskVo> updateTask(
             @PathVariable Long id,
             @RequestBody TaskDto dto

@@ -28,7 +28,6 @@ public class TaskDaoImpl implements TaskDao {
     @Override
     public TaskVo createTask(Task entity) {
 
-        entity.setTaskStatus(TaskStatus.PENDING);
         Task saved =  taskRepo.save(entity);
 
         return taskMapper.entityToVo(saved);

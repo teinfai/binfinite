@@ -11,14 +11,11 @@ import javax.validation.constraints.NotNull;
 @Setter
 @Data
 public class TaskDto {
-    @NotNull(message = "title is required.")
-    @NotBlank(message = "title cannot be blank.")
     private String title;
-
     private String description;
-
-    @NotNull(message = "taskStatus is required.")
-    private TaskStatus taskStatus;
+    private Boolean completed;    // new
+    // getters & setters
 }
+
 
 

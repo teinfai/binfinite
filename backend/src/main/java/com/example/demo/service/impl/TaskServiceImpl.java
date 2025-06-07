@@ -34,9 +34,9 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public TaskVo createTask(TaskDto task) {
         log.debug("Creating task with title={}", task.getTitle());
+        task.setCompleted(false);
         Task entity = taskMapper.dtoToEntity(task);
-        TaskVo returnResponse = taskDao.createTask(entity);
-        return returnResponse;
+        return taskDao.createTask(entity);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class TaskServiceImpl implements TaskService {
         }
         // copy fields from dto onto existing
         Task toSave = taskMapper.dtoToEntity(dto);
-        toSave.setId(existing.getId()); // ensure ID stays the same
+        toSave.setId(existing.getId());
         return taskDao.updateTask(toSave);
     }
 

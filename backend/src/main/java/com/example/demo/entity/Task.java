@@ -21,12 +21,8 @@ public class Task {
     @Column(nullable = false)
     private String title;
 
-
     private String description;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TaskStatus taskStatus;
+    private Boolean completed = false;
 }
 

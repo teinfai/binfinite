@@ -14,5 +14,5 @@ public class TaskVo {
     private Long id;
     private String title;
     private String description;
-    private TaskStatus taskStatus;
+    private Boolean completed;  // new
 }
