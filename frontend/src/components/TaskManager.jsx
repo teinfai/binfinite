@@ -6,6 +6,7 @@ export default function TaskManager() {
     const [tasks, setTasks] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [completed, setCompleted] = useState('');
     const [editingId, setEditingId] = useState(null);
 
     const fetchTasks = async () => {
@@ -19,7 +20,7 @@ export default function TaskManager() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const payload = { title, description };
+        const payload = { title, description, completed };
         if (editingId) {
             await api.put(`/updateTask/${editingId}`, payload);
             setEditingId(null);
@@ -37,6 +38,7 @@ export default function TaskManager() {
         setTitle(task.title);
         setDescription(task.description);
         setEditingId(task.id);
+        setCompleted(task.completed);
     };
 
     const handleDelete = async (id) => {

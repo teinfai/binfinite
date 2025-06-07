@@ -2,10 +2,11 @@ package com.example.demo.dao.impl;
 
 import com.example.demo.dao.TaskDao;
 import com.example.demo.entity.Task;
-import com.example.demo.enums.TaskStatus;
 import com.example.demo.mapper.TaskMapper;
 import com.example.demo.repository.TaskRepo;
 import com.example.demo.vo.TaskVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,10 +15,10 @@ import java.util.List;
 public class TaskDaoImpl implements TaskDao {
 
     private final TaskRepo taskRepo;
-    private final TaskMapper taskMapper; // Add this
+    private final TaskMapper taskMapper;
+    private static final Logger log = LoggerFactory.getLogger(TaskDaoImpl.class);
 
-
-    TaskDaoImpl(
+    public TaskDaoImpl(
             TaskRepo taskRepo,
             TaskMapper taskMapper
     ) {
@@ -27,32 +28,44 @@ public class TaskDaoImpl implements TaskDao {
 
     @Override
     public TaskVo createTask(Task entity) {
-
-        Task saved =  taskRepo.save(entity);
-
+        log.debug(">> createTask(entity={})", entity);
+        Task saved = taskRepo.save(entity);
+        log.info("<< createTask saved id={}, title={}", saved.getId(), saved.getTitle());
         return taskMapper.entityToVo(saved);
     }
 
     @Override
     public Task findById(Long id) {
-        return taskRepo.findById(id).orElse(null);
+        log.debug(">> findById(id={})", id);
+        Task found = taskRepo.findById(id).orElse(null);
+        if (found == null) {
+            log.warn("<< findById: no task found for id={}", id);
+        } else {
+            log.info("<< findById found {}", found);
+        }
+        return found;
     }
 
     @Override
     public List<Task> findAll() {
-        return taskRepo.findAll();
+        log.debug(">> findAll()");
+        List<Task> list = taskRepo.findAll();
+        log.info("<< findAll returned {} tasks", list.size());
+        return list;
     }
 
     @Override
     public TaskVo updateTask(Task entity) {
+        log.debug(">> updateTask(entity={})", entity);
         Task saved = taskRepo.save(entity);
+        log.info("<< updateTask updated id={}, title={}", saved.getId(), saved.getTitle());
         return taskMapper.entityToVo(saved);
     }
 
     @Override
     public void deleteById(Long id) {
+        log.debug(">> deleteById(id={})", id);
         taskRepo.deleteById(id);
+        log.info("<< deleteById completed for id={}", id);
     }
-
-
 }
