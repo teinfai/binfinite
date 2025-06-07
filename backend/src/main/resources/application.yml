@@ -1,0 +1,23 @@
+server:
+  port: 8081
+
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/demo_db2?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+    username: root
+    password: mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: true               # print all SQL
+    hibernate:
+      ddl-auto: update           # create / update tables
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+# application.yml
+  logging:
+    file:
+      path: logs          # <== only the folder; logback-spring.xml still decides the file name
