@@ -4,8 +4,8 @@ import com.example.demo.dao.TaskDao;
 import com.example.demo.dto.TaskDto;
 import com.example.demo.entity.Task;
 import com.example.demo.mapper.TaskMapper;
-import com.example.demo.vo.TaskVo;
 import com.example.demo.service.impl.TaskServiceImpl;
+import com.example.demo.vo.TaskVo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,11 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
-import java.util.Arrays;
-import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class TaskServiceImplTest {
@@ -87,7 +87,7 @@ class TaskServiceImplTest {
 
     @Test
     void getAllTasks_returnsListOfVos() {
-        when(taskDao.findAll()).thenReturn(Arrays.asList(entity));
+        when(taskDao.findAll()).thenReturn(Collections.singletonList(entity));
         when(taskMapper.entityToVo(entity)).thenReturn(vo);
 
         List<TaskVo> list = service.getAllTasks();
@@ -97,20 +97,23 @@ class TaskServiceImplTest {
 
     @Test
     void updateTask_notFound_returnsNull() {
-        when(taskDao.findById(5L)).thenReturn(null);
+        when(taskMapper.dtoToEntity(dto)).thenReturn(entity);
+        when(taskDao.updateTask(entity)).thenReturn(null);
 
         TaskVo result = service.updateTask(5L, dto);
         assertNull(result);
+        verify(taskMapper).dtoToEntity(dto);
+        verify(taskDao).updateTask(entity);
     }
 
     @Test
     void updateTask_found_updatesAndReturnsVo() {
-        when(taskDao.findById(3L)).thenReturn(entity);
         when(taskMapper.dtoToEntity(dto)).thenReturn(entity);
         when(taskDao.updateTask(entity)).thenReturn(vo);
 
         TaskVo result = service.updateTask(3L, dto);
         assertEquals(vo, result);
+        verify(taskMapper).dtoToEntity(dto);
         verify(taskDao).updateTask(entity);
     }
 }
