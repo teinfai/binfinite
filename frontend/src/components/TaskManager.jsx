@@ -1,12 +1,15 @@
+// src/components/TaskManager.jsx
+
 import React, { useEffect, useState } from 'react';
-import api from '../services/api';
+import api from '../services/api';   // your axios instance with baseURL='/api/task'
 import { Button, Form, Table } from 'react-bootstrap';
 
 export default function TaskManager() {
     const [tasks, setTasks] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [completed, setCompleted] = useState('');
+    // ✅ completed is a boolean, default to false
+    const [completed, setCompleted] = useState(false);
     const [editingId, setEditingId] = useState(null);
 
     const fetchTasks = async () => {
@@ -20,25 +23,39 @@ export default function TaskManager() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const payload = { title, description, completed };
+
         if (editingId) {
-            await api.put(`/updateTask/${editingId}`, payload);
+            // Update an existing task: keep its completed flag
+            await api.put(`/updateTask/${editingId}`, {
+                title,
+                description,
+                completed
+            });
             setEditingId(null);
         } else {
-            await api.post('/createTask', payload);
+            // Create a new task: always start as not completed
+            await api.post('/createTask', {
+                title,
+                description,
+                completed: false
+            });
         }
+
+        // Reset form fields
         setTitle('');
         setDescription('');
+        setCompleted(false);
+
+        // Refresh the list
         fetchTasks();
     };
 
     const handleEdit = (task) => {
-        console.log(task);
-
+        // Load task into form for editing
         setTitle(task.title);
         setDescription(task.description);
-        setEditingId(task.id);
         setCompleted(task.completed);
+        setEditingId(task.id);
     };
 
     const handleDelete = async (id) => {
@@ -47,17 +64,14 @@ export default function TaskManager() {
     };
 
     const toggleComplete = async (task) => {
-
         if (task.completed) {
-            return false;
+            return; // already completed
         }
-
-        const payload = {
+        await api.put(`/updateTask/${task.id}`, {
             title: task.title,
             description: task.description,
-            completed: !task.completed
-        };
-        await api.put(`/updateTask/${task.id}`, payload);
+            completed: true
+        });
         fetchTasks();
     };
 
@@ -69,7 +83,7 @@ export default function TaskManager() {
                         type="text"
                         placeholder="Title"
                         value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        onChange={e => setTitle(e.target.value)}
                         required
                     />
                 </Form.Group>
@@ -78,7 +92,7 @@ export default function TaskManager() {
                         type="text"
                         placeholder="Description"
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        onChange={e => setDescription(e.target.value)}
                         required
                     />
                 </Form.Group>
@@ -97,7 +111,7 @@ export default function TaskManager() {
                     </tr>
                 </thead>
                 <tbody>
-                    {tasks.map((task) => (
+                    {tasks.map(task => (
                         <tr key={task.id}>
                             <td>{task.title}</td>
                             <td>{task.description}</td>
@@ -109,7 +123,6 @@ export default function TaskManager() {
                                     onClick={() => toggleComplete(task)}
                                     className="me-2"
                                     disabled={task.completed}
-
                                 >
                                     Toggle Complete
                                 </Button>
