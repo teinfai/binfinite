@@ -1,192 +1,102 @@
 # binfinite
 
-A simple full-stack application with a Java 8 + Spring Boot backend (with Swagger) and a React JS frontend. Designed to run locally or be deployed on [Render](https://render.com).
-
----
-
-## Table of Contents
-
-1. [Prerequisites](#prerequisites)
-2. [Project Structure](#project-structure)
-3. [Backend Setup](#backend-setup)
-
-   * [Configuration](#configuration)
-   * [Running Locally](#running-locally)
-   * [Swagger UI](#swagger-ui)
-4. [Frontend Setup](#frontend-setup)
-
-   * [Configuration](#configuration-1)
-   * [Running Locally](#running-locally-1)
-5. [Building for Production](#building-for-production)
-6. [Deploying on Render](#deploying-on-render)
-
-   * [Backend on Render](#backend-on-render)
-   * [Frontend on Render](#frontend-on-render)
-7. [API Documentation](#api-documentation)
-8. [License](#license)
+A simple full-stack application with a Java 8 + Spring Boot backend (with Swagger) and a React frontend. Run locally or deploy on Render.
 
 ---
 
 ## Prerequisites
-* **Java JDK 8** (OpenJDK 1.8 or Oracle)
-* **Maven 3.6+**
-* **Node.js 14+** and **npm**
-* **MySQL** (optional—you can use the bundled H2 in-memory DB for testing)
 
-## Backend Setup
+* Java JDK 8
+* Maven 3.6+
+* Node.js 14+ and npm
 
-### Configuration
+---
 
-1. **Unzip** `backend.zip` (if you haven’t already):
-
-   ```bash
-   unzip backend.zip -d backend
-   ```
-2. **Database**
-
-   * By default the app uses an in-memory H2.
-   * To use MySQL, open `backend/src/main/resources/application.properties` and set:
-
-     ```properties
-     spring.datasource.url=jdbc:mysql://localhost:3306/binfinite_db
-     spring.datasource.username=YOUR_DB_USER
-     spring.datasource.password=YOUR_DB_PASS
-     spring.jpa.hibernate.ddl-auto=update
-     ```
-3. **(Optional) Change server port** by adding:
-
-   ```properties
-   server.port=8080
-   ```
-
-### Running Locally
-
-```bash
-cd backend
-# On Unix/macOS
-./mvnw clean spring-boot:run
-
-# On Windows
-mvnw.cmd clean spring-boot:run
-```
-
-The backend will start on `http://localhost:8080`.
-
-### Swagger UI
-
-Once running, explore all REST endpoints at:
+## Project Structure
 
 ```
-http://localhost:8080/swagger-ui/index.html
+binfinite/
+├── Dockerfile
+├── backend/     # Spring Boot project
+└── frontend/    # React app
 ```
 
 ---
 
-## Frontend Setup
+## Run Locally
 
-### Configuration
+1. **Backend**
 
-1. Open `frontend/src/services/api.js`.
-
-2. Ensure the base URL points at your backend:
-
-   ```js
-   import axios from 'axios';
-
-   const API = axios.create({
-     baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8081/api'
-   });
-
-   export default API;
+   ```bash
+   cd backend
+   ./mvnw spring-boot:run     # Windows: mvnw.cmd spring-boot:run
    ```
 
-3. (Optional) Create a `.env` in `/frontend`:
+   Opens at [http://localhost:8081](http://localhost:8081) (default port)
 
-   ```dotenv
-   REACT_APP_API_URL=http://localhost:8081/api
+2. **Frontend**
+
+   ```bash
+   cd frontend
+   npm install
+   npm start
    ```
 
-### Running Locally
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-Your React app will be live at `http://localhost:3000`.
+   Opens at [http://localhost:3000](http://localhost:3000) (proxied to backend)
 
 ---
 
-## Building for Production
+## Build for Production
 
-### Backend
+* **Backend**
 
-```bash
-cd backend
-./mvnw clean package
-# Then:
-java -jar target/demo-0.0.1-SNAPSHOT.jar
-```
+  ```bash
+  cd backend
+  ./mvnw clean package
+  java -jar target/*.jar
+  ```
+* **Frontend**
 
-### Frontend
-
-```bash
-cd frontend
-npm run build
-# → outputs static files into frontend/build/
-```
-
-
-## Deploying on Render
-
-### Backend on Render
-
-1. **New Web Service** → Connect your GitHub repo & branch.
-2. **Build Command**
-
-   ```bash
-   ./mvnw clean package
-   ```
-3. **Start Command**
-
-   ```bash
-   java -jar target/demo-0.0.1-SNAPSHOT.jar
-   ```
-4. **Environment**
-
-   * `SPRING_DATASOURCE_URL`
-   * `SPRING_DATASOURCE_USERNAME`
-   * `SPRING_DATASOURCE_PASSWORD`
-   * (optional) `PORT` (default 8080)
-5. **Instance**: choose `Free` or `Standard` plan.
-
-### Frontend on Render
-
-1. **New Static Site** → Connect same repo.
-2. **Root Directory**: `frontend`
-3. **Build Command**
-
-   ```bash
-   npm install && npm run build
-   ```
-4. **Publish Directory**: `frontend/build`
-5. **Env Vars**
-
-   * `REACT_APP_API_URL=https://<your-backend-service>.onrender.com/api`
+  ```bash
+  cd frontend
+  npm run build
+  ```
 
 ---
 
-## API Documentation
+## Deploy on Render
 
-Once deployed, Swagger is available at:
+1. Push your repo to GitHub/GitLab.
+2. In Render dashboard, create a new **Web Service** (Docker).
+3. Point to your `Dockerfile` at repo root.
+4. Enable **Auto-Deploy** on your branch (e.g. main).
 
-```
-https://<your-backend-service>.onrender.com/swagger-ui/index.html
-```
+Render builds and deploys automatically (takes \~2–5 min). No extra config needed for H2 in-memory DB.
+
+**Live URL:** [https://binfinite.onrender.com/](https://binfinite.onrender.com/)
+
+---
+
+## Swagger UI
+
+* **Locally:**
+
+  ```
+  http://localhost:8081/swagger-ui/index.html
+  ```
+* **On Render (Live):**
+
+  ```
+  https://binfinite.onrender.com/swagger-ui/index.html
+  ```
+
+  https\://<your-service>.onrender.com/swagger-ui/index.html
+
+  ```
+  ```
 
 ---
 
 ## License
 
-This project is released under the [MIT License](LICENSE.md).
+MIT License | See [LICENSE](LICENSE.md)
