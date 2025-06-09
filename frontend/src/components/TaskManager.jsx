@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import {
-    Button,
-    Form,
-    Table,
-    Container,
-    Card,
-    Badge,
-    Row,
-    Col,
-    Stack
+    Button, Form, Table, Container, Card,
+    Badge, Row, Col, Stack, Modal
 } from 'react-bootstrap';
 import { BsCheckCircle, BsHourglassSplit, BsPencil, BsTrash } from 'react-icons/bs';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function TaskManager() {
     const [tasks, setTasks] = useState([]);
@@ -20,9 +15,16 @@ export default function TaskManager() {
     const [completed, setCompleted] = useState(false);
     const [editingId, setEditingId] = useState(null);
 
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [taskToDelete, setTaskToDelete] = useState(null);
+
     const fetchTasks = async () => {
-        const res = await api.get('/listAll');
-        setTasks(res.data);
+        try {
+            const res = await api.get('/listAll');
+            setTasks(res.data);
+        } catch (err) {
+            toast.error("Failed to fetch tasks");
+        }
     };
 
     useEffect(() => {
@@ -31,18 +33,23 @@ export default function TaskManager() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        try {
+            if (editingId) {
+                await api.put(`/updateTask/${editingId}`, { title, description, completed });
+                toast.success("Task updated");
+                setEditingId(null);
+            } else {
+                await api.post('/createTask', { title, description, completed: false });
+                toast.success("Task added");
+            }
 
-        if (editingId) {
-            await api.put(`/updateTask/${editingId}`, { title, description, completed });
-            setEditingId(null);
-        } else {
-            await api.post('/createTask', { title, description, completed: false });
+            setTitle('');
+            setDescription('');
+            setCompleted(false);
+            fetchTasks();
+        } catch (err) {
+            toast.error("Operation failed");
         }
-
-        setTitle('');
-        setDescription('');
-        setCompleted(false);
-        fetchTasks();
     };
 
     const handleEdit = (task) => {
@@ -52,23 +59,41 @@ export default function TaskManager() {
         setEditingId(task.id);
     };
 
-    const handleDelete = async (id) => {
-        await api.delete(`/${id}`);
-        fetchTasks();
+    const confirmDelete = (task) => {
+        setTaskToDelete(task);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirmed = async () => {
+        try {
+            await api.delete(`/${taskToDelete.id}`);
+            toast.success("Task deleted");
+            fetchTasks();
+        } catch (err) {
+            toast.error("Delete failed");
+        }
+        setShowDeleteModal(false);
+        setTaskToDelete(null);
     };
 
     const toggleComplete = async (task) => {
         if (task.completed) return;
-        await api.put(`/updateTask/${task.id}`, {
-            title: task.title,
-            description: task.description,
-            completed: true
-        });
-        fetchTasks();
+        try {
+            await api.put(`/updateTask/${task.id}`, {
+                title: task.title,
+                description: task.description,
+                completed: true
+            });
+            toast.success("Task marked as completed");
+            fetchTasks();
+        } catch (err) {
+            toast.error("Update failed");
+        }
     };
 
     return (
         <Container className="my-5">
+            <ToastContainer position="top-center" autoClose={2000} />
             <h2 className="text-center mb-4 fw-bold">📝 Task Manager</h2>
             <Row className="g-4">
                 <Col md={4}>
@@ -154,7 +179,7 @@ export default function TaskManager() {
                                                     <Button
                                                         size="sm"
                                                         variant="outline-danger"
-                                                        onClick={() => handleDelete(task.id)}
+                                                        onClick={() => confirmDelete(task)}
                                                     >
                                                         <BsTrash />
                                                     </Button>
@@ -168,6 +193,25 @@ export default function TaskManager() {
                     </Card>
                 </Col>
             </Row>
+
+            {/* Delete Confirmation Modal */}
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Deletion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete the task{' '}
+                    <strong>{taskToDelete?.title}</strong>?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={handleDeleteConfirmed}>
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 }
