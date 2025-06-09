@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { Button, Form, Table, Container, Card, Badge, Row, Col } from 'react-bootstrap';
+import {
+    Button,
+    Form,
+    Table,
+    Container,
+    Card,
+    Badge,
+    Row,
+    Col,
+    Stack
+} from 'react-bootstrap';
+import { BsCheckCircle, BsHourglassSplit, BsPencil, BsTrash } from 'react-icons/bs';
 
 export default function TaskManager() {
     const [tasks, setTasks] = useState([]);
@@ -58,91 +69,105 @@ export default function TaskManager() {
 
     return (
         <Container className="my-5">
-            <Card className="p-4 shadow-sm mb-4">
-                <Card.Title>{editingId ? 'Update Task' : 'Add New Task'}</Card.Title>
-                <Form onSubmit={handleSubmit}>
-                    <Row className="g-2 mb-3">
-                        <Col md>
-                            <Form.Control
-                                type="text"
-                                placeholder="Title"
-                                value={title}
-                                onChange={e => setTitle(e.target.value)}
-                                required
-                            />
-                        </Col>
-                        <Col md>
-                            <Form.Control
-                                type="text"
-                                placeholder="Description"
-                                value={description}
-                                onChange={e => setDescription(e.target.value)}
-                                required
-                            />
-                        </Col>
-                        <Col xs="auto">
-                            <Button type="submit" variant="primary">
-                                {editingId ? 'Update' : 'Add'}
+            <h2 className="text-center mb-4 fw-bold">📝 Task Manager</h2>
+            <Row className="g-4">
+                <Col md={4}>
+                    <Card className="shadow-sm p-3">
+                        <Card.Title className="mb-3">
+                            {editingId ? '✏️ Edit Task' : '➕ Add Task'}
+                        </Card.Title>
+                        <Form onSubmit={handleSubmit}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Title</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={title}
+                                    onChange={e => setTitle(e.target.value)}
+                                    placeholder="Enter task title"
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Description</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={description}
+                                    onChange={e => setDescription(e.target.value)}
+                                    placeholder="Enter task description"
+                                    required
+                                />
+                            </Form.Group>
+                            <Button type="submit" variant="primary" className="w-100">
+                                {editingId ? 'Update Task' : 'Add Task'}
                             </Button>
-                        </Col>
-                    </Row>
-                </Form>
-            </Card>
+                        </Form>
+                    </Card>
+                </Col>
 
-            <Card className="shadow-sm">
-                <Card.Body>
-                    <Card.Title>Task List</Card.Title>
-                    <Table responsive bordered hover className="align-middle">
-                        <thead className="table-light">
-                            <tr>
-                                <th>Title</th>
-                                <th>Description</th>
-                                <th>Status</th>
-                                <th className="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {tasks.map(task => (
-                                <tr key={task.id}>
-                                    <td>{task.title}</td>
-                                    <td>{task.description}</td>
-                                    <td>
-                                        <Badge bg={task.completed ? 'success' : 'secondary'}>
-                                            {task.completed ? 'Completed' : 'Pending'}
-                                        </Badge>
-                                    </td>
-                                    <td className="text-center">
-                                        <Button
-                                            variant="success"
-                                            size="sm"
-                                            onClick={() => toggleComplete(task)}
-                                            className="me-2"
-                                            disabled={task.completed}
-                                        >
-                                            Complete
-                                        </Button>
-                                        <Button
-                                            variant="warning"
-                                            size="sm"
-                                            onClick={() => handleEdit(task)}
-                                            className="me-2"
-                                        >
-                                            Edit
-                                        </Button>
-                                        <Button
-                                            variant="danger"
-                                            size="sm"
-                                            onClick={() => handleDelete(task.id)}
-                                        >
-                                            Delete
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
-                </Card.Body>
-            </Card>
+                <Col md={8}>
+                    <Card className="shadow-sm p-3">
+                        <Card.Title className="mb-3">📋 Task List</Card.Title>
+                        {tasks.length === 0 ? (
+                            <p className="text-muted text-center">No tasks found. Add some!</p>
+                        ) : (
+                            <Table bordered responsive hover className="align-middle">
+                                <thead className="table-light">
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th className="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tasks.map(task => (
+                                        <tr key={task.id}>
+                                            <td>{task.title}</td>
+                                            <td>{task.description}</td>
+                                            <td>
+                                                <Badge bg={task.completed ? 'success' : 'warning'}>
+                                                    {task.completed ? (
+                                                        <BsCheckCircle className="me-1" />
+                                                    ) : (
+                                                        <BsHourglassSplit className="me-1" />
+                                                    )}
+                                                    {task.completed ? 'Completed' : 'Pending'}
+                                                </Badge>
+                                            </td>
+                                            <td className="text-center">
+                                                <Stack direction="horizontal" gap={2} className="justify-content-center">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="success"
+                                                        onClick={() => toggleComplete(task)}
+                                                        disabled={task.completed}
+                                                    >
+                                                        ✅
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline-warning"
+                                                        onClick={() => handleEdit(task)}
+                                                    >
+                                                        <BsPencil />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline-danger"
+                                                        onClick={() => handleDelete(task.id)}
+                                                    >
+                                                        <BsTrash />
+                                                    </Button>
+                                                </Stack>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        )}
+                    </Card>
+                </Col>
+            </Row>
         </Container>
     );
 }
