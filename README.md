@@ -13,8 +13,6 @@ A simple full-stack application with:
 - Maven 3.6+
 - Node.js 14+ and npm
 
----
-
 ## Project Structure
 
 ```
