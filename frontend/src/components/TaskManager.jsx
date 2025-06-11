@@ -28,6 +28,7 @@ export default function TaskManager() {
     };
 
     useEffect(() => {
+        // run once
         fetchTasks();
     }, []);
 
