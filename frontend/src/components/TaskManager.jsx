@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import {
     Button, Form, Table, Container, Card,
-    Badge, Row, Col, Stack, Modal
+    Badge, Row, Col, Stack
 } from 'react-bootstrap';
 import { BsCheckCircle, BsHourglassSplit, BsPencil, BsTrash } from 'react-icons/bs';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 export default function TaskManager() {
     const [tasks, setTasks] = useState([]);
@@ -96,11 +97,19 @@ export default function TaskManager() {
     return (
         <Container className="my-5">
             <ToastContainer position="top-center" autoClose={2000} />
-            <h2 className="text-center mb-4 fw-bold">📝 Task Manager</h2>
+            <h2 className="text-center mb-4 fw-bold" style={{
+                color: '#2c3e50',
+                fontSize: '2.5rem',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
+            }}>📝 Task Manager</h2>
             <Row className="g-4">
                 <Col md={4}>
-                    <Card className="shadow-sm p-3">
-                        <Card.Title className="mb-3">
+                    <Card className="shadow-sm p-3" style={{
+                        borderRadius: '15px',
+                        border: 'none',
+                        backgroundColor: '#f8f9fa'
+                    }}>
+                        <Card.Title className="mb-3" style={{ color: '#2c3e50' }}>
                             {editingId ? '✏️ Edit Task' : '➕ Add Task'}
                         </Card.Title>
                         <Form onSubmit={handleSubmit}>
@@ -124,7 +133,17 @@ export default function TaskManager() {
                                     required
                                 />
                             </Form.Group>
-                            <Button type="submit" variant="primary" className="w-100">
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                className="w-100"
+                                style={{
+                                    borderRadius: '10px',
+                                    padding: '10px',
+                                    fontWeight: '600',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
                                 {editingId ? 'Update Task' : 'Add Task'}
                             </Button>
                         </Form>
@@ -132,13 +151,22 @@ export default function TaskManager() {
                 </Col>
 
                 <Col md={8}>
-                    <Card className="shadow-sm p-3">
-                        <Card.Title className="mb-3">📋 Task List</Card.Title>
+                    <Card className="shadow-sm p-3" style={{
+                        borderRadius: '15px',
+                        border: 'none',
+                        backgroundColor: '#f8f9fa'
+                    }}>
+                        <Card.Title className="mb-3" style={{ color: '#2c3e50' }}>
+                            📋 Task List
+                        </Card.Title>
                         {tasks.length === 0 ? (
                             <p className="text-muted text-center">No tasks found. Add some!</p>
                         ) : (
-                            <Table bordered responsive hover className="align-middle">
-                                <thead className="table-light">
+                            <Table bordered hover className="align-middle" style={{
+                                borderRadius: '10px',
+                                overflow: 'hidden'
+                            }}>
+                                <thead style={{ backgroundColor: '#e9ecef' }}>
                                     <tr>
                                         <th>Title</th>
                                         <th>Description</th>
@@ -148,7 +176,10 @@ export default function TaskManager() {
                                 </thead>
                                 <tbody>
                                     {tasks.map(task => (
-                                        <tr key={task.id}>
+                                        <tr key={task.id} style={{
+                                            transition: 'all 0.2s ease',
+                                            backgroundColor: task.completed ? '#f8fff8' : 'white'
+                                        }}>
                                             <td>{task.title}</td>
                                             <td>{task.description}</td>
                                             <td>
@@ -168,6 +199,10 @@ export default function TaskManager() {
                                                         variant="success"
                                                         onClick={() => toggleComplete(task)}
                                                         disabled={task.completed}
+                                                        style={{
+                                                            borderRadius: '8px',
+                                                            transition: 'all 0.2s ease'
+                                                        }}
                                                     >
                                                         ✅
                                                     </Button>
@@ -175,6 +210,10 @@ export default function TaskManager() {
                                                         size="sm"
                                                         variant="outline-warning"
                                                         onClick={() => handleEdit(task)}
+                                                        style={{
+                                                            borderRadius: '8px',
+                                                            transition: 'all 0.2s ease'
+                                                        }}
                                                     >
                                                         <BsPencil />
                                                     </Button>
@@ -182,6 +221,10 @@ export default function TaskManager() {
                                                         size="sm"
                                                         variant="outline-danger"
                                                         onClick={() => confirmDelete(task)}
+                                                        style={{
+                                                            borderRadius: '8px',
+                                                            transition: 'all 0.2s ease'
+                                                        }}
                                                     >
                                                         <BsTrash />
                                                     </Button>
@@ -196,24 +239,12 @@ export default function TaskManager() {
                 </Col>
             </Row>
 
-            {/* Delete Confirmation Modal */}
-            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
-                <Modal.Header closeButton>
-                    <Modal.Title>Confirm Deletion</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    Are you sure you want to delete the task{' '}
-                    <strong>{taskToDelete?.title}</strong>?
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="danger" onClick={handleDeleteConfirmed}>
-                        Delete
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <DeleteConfirmationModal
+                show={showDeleteModal}
+                onHide={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteConfirmed}
+                task={taskToDelete}
+            />
         </Container>
     );
 }
