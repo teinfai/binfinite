@@ -8,6 +8,7 @@ import { BsCheckCircle, BsHourglassSplit, BsPencil, BsTrash } from 'react-icons/
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import '../styles/main.scss';
 
 export default function TaskManager() {
     const [tasks, setTasks] = useState([]);
@@ -97,19 +98,11 @@ export default function TaskManager() {
     return (
         <Container className="my-5">
             <ToastContainer position="top-center" autoClose={2000} />
-            <h2 className="text-center mb-4 fw-bold" style={{
-                color: '#2c3e50',
-                fontSize: '2.5rem',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
-            }}>📝 Task Manager</h2>
+            <h2 className="task-manager__title">📝 Task Manager</h2>
             <Row className="g-4">
                 <Col md={4}>
-                    <Card className="shadow-sm p-3" style={{
-                        borderRadius: '15px',
-                        border: 'none',
-                        backgroundColor: '#f8f9fa'
-                    }}>
-                        <Card.Title className="mb-3" style={{ color: '#2c3e50' }}>
+                    <Card className="task-manager__card shadow-sm p-3">
+                        <Card.Title className="task-manager__card-title">
                             {editingId ? '✏️ Edit Task' : '➕ Add Task'}
                         </Card.Title>
                         <Form onSubmit={handleSubmit}>
@@ -136,13 +129,7 @@ export default function TaskManager() {
                             <Button
                                 type="submit"
                                 variant="primary"
-                                className="w-100"
-                                style={{
-                                    borderRadius: '10px',
-                                    padding: '10px',
-                                    fontWeight: '600',
-                                    transition: 'all 0.3s ease'
-                                }}
+                                className="task-manager__submit-btn w-100"
                             >
                                 {editingId ? 'Update Task' : 'Add Task'}
                             </Button>
@@ -151,22 +138,15 @@ export default function TaskManager() {
                 </Col>
 
                 <Col md={8}>
-                    <Card className="shadow-sm p-3" style={{
-                        borderRadius: '15px',
-                        border: 'none',
-                        backgroundColor: '#f8f9fa'
-                    }}>
-                        <Card.Title className="mb-3" style={{ color: '#2c3e50' }}>
+                    <Card className="task-manager__card shadow-sm p-3">
+                        <Card.Title className="task-manager__card-title">
                             📋 Task List
                         </Card.Title>
                         {tasks.length === 0 ? (
-                            <p className="text-muted text-center">No tasks found. Add some!</p>
+                            <p className="task-manager__card--no-tasks text-muted">No tasks found. Add some!</p>
                         ) : (
-                            <Table bordered hover className="align-middle" style={{
-                                borderRadius: '10px',
-                                overflow: 'hidden'
-                            }}>
-                                <thead style={{ backgroundColor: '#e9ecef' }}>
+                            <Table bordered hover className="task-manager__table align-middle">
+                                <thead className="task-manager__table-head">
                                     <tr>
                                         <th>Title</th>
                                         <th>Description</th>
@@ -176,10 +156,7 @@ export default function TaskManager() {
                                 </thead>
                                 <tbody>
                                     {tasks.map(task => (
-                                        <tr key={task.id} style={{
-                                            transition: 'all 0.2s ease',
-                                            backgroundColor: task.completed ? '#f8fff8' : 'white'
-                                        }}>
+                                        <tr key={task.id} className={`task-manager__table-row ${task.completed ? 'task-manager__table-row--completed' : ''}`}>
                                             <td>{task.title}</td>
                                             <td>{task.description}</td>
                                             <td>
@@ -199,10 +176,7 @@ export default function TaskManager() {
                                                         variant="success"
                                                         onClick={() => toggleComplete(task)}
                                                         disabled={task.completed}
-                                                        style={{
-                                                            borderRadius: '8px',
-                                                            transition: 'all 0.2s ease'
-                                                        }}
+                                                        className="task-manager__action-btn"
                                                     >
                                                         ✅
                                                     </Button>
@@ -210,10 +184,7 @@ export default function TaskManager() {
                                                         size="sm"
                                                         variant="outline-warning"
                                                         onClick={() => handleEdit(task)}
-                                                        style={{
-                                                            borderRadius: '8px',
-                                                            transition: 'all 0.2s ease'
-                                                        }}
+                                                        className="task-manager__action-btn"
                                                     >
                                                         <BsPencil />
                                                     </Button>
@@ -221,10 +192,7 @@ export default function TaskManager() {
                                                         size="sm"
                                                         variant="outline-danger"
                                                         onClick={() => confirmDelete(task)}
-                                                        style={{
-                                                            borderRadius: '8px',
-                                                            transition: 'all 0.2s ease'
-                                                        }}
+                                                        className="task-manager__action-btn"
                                                     >
                                                         <BsTrash />
                                                     </Button>
