@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import api from '../services/api';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import TaskService from '../services/TaskService';
 import {
     Button, Form, Table, Container, Card,
     Badge, Row, Col, Stack
@@ -20,30 +20,32 @@ export default function TaskManager() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [taskToDelete, setTaskToDelete] = useState(null);
 
-    const fetchTasks = async () => {
+    // Memoize fetch tasks callback
+    const fetchTasks = useCallback(async () => {
         try {
-            const res = await api.get('/listAll');
-            setTasks(res.data);
+            const data = await TaskService.getAllTasks();
+            setTasks(data);
         } catch (err) {
             toast.error("Failed to fetch tasks");
         }
-    };
+    }, []);
 
     useEffect(() => {
         // run once
         fetchTasks();
-    }, []);
+    }, [fetchTasks]);
 
-    const handleSubmit = async (e) => {
+    // Memoize handlers
+    const handleSubmit = useCallback(async (e) => {
         // onhandle
         e.preventDefault();
         try {
             if (editingId) {
-                await api.put(`/updateTask/${editingId}`, { title, description, completed });
+                await TaskService.updateTask(editingId, { title, description, completed });
                 toast.success("Task updated");
                 setEditingId(null);
             } else {
-                await api.post('/createTask', { title, description, completed: false });
+                await TaskService.createTask({ title, description });
                 toast.success("Task added");
             }
 
@@ -54,23 +56,23 @@ export default function TaskManager() {
         } catch (err) {
             toast.error("Operation failed");
         }
-    };
+    }, [title, description, completed, editingId, fetchTasks]);
 
-    const handleEdit = (task) => {
+    const handleEdit = useCallback((task) => {
         setTitle(task.title);
         setDescription(task.description);
         setCompleted(task.completed);
         setEditingId(task.id);
-    };
+    }, []);
 
     const confirmDelete = (task) => {
         setTaskToDelete(task);
         setShowDeleteModal(true);
     };
 
-    const handleDeleteConfirmed = async () => {
+    const handleDeleteConfirmed = useCallback(async () => {
         try {
-            await api.delete(`/${taskToDelete.id}`);
+            await TaskService.deleteTask(taskToDelete.id);
             toast.success("Task deleted");
             fetchTasks();
         } catch (err) {
@@ -78,22 +80,109 @@ export default function TaskManager() {
         }
         setShowDeleteModal(false);
         setTaskToDelete(null);
-    };
+    }, [taskToDelete, fetchTasks]);
 
-    const toggleComplete = async (task) => {
+    const toggleComplete = useCallback(async (task) => {
         if (task.completed) return;
         try {
-            await api.put(`/updateTask/${task.id}`, {
-                title: task.title,
-                description: task.description,
-                completed: true
-            });
+            await TaskService.markAsCompleted(task);
             toast.success("Task marked as completed");
             fetchTasks();
         } catch (err) {
             toast.error("Update failed");
         }
-    };
+    }, [fetchTasks]);
+
+    // Memoize task lists
+    const pendingTasks = useMemo(() => {
+        return tasks.filter(task => !task.completed);
+    }, [tasks]);
+
+    const completedTasks = useMemo(() => {
+        return tasks.filter(task => task.completed);
+    }, [tasks]);
+
+    // Memoize form section
+    const taskForm = useMemo(() => (
+        <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3">
+                <Form.Label>Title</Form.Label>
+                <Form.Control
+                    type="text"
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    placeholder="Enter task title"
+                    required
+                />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>Description</Form.Label>
+                <Form.Control
+                    type="text"
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    placeholder="Enter task description"
+                    required
+                />
+            </Form.Group>
+            <Button
+                type="submit"
+                variant="primary"
+                className="task-manager__submit-btn w-100"
+            >
+                {editingId ? 'Update Task' : 'Add Task'}
+            </Button>
+        </Form>
+    ), [title, description, editingId, handleSubmit]);
+
+    // Memoize table rows
+    const taskRows = useMemo(() => (
+        tasks.map(task => (
+            <tr key={task.id} className={`task-manager__table-row ${task.completed ? 'task-manager__table-row--completed' : ''}`}>
+                <td>{task.title}</td>
+                <td>{task.description}</td>
+                <td>
+                    <Badge bg={task.completed ? 'success' : 'warning'}>
+                        {task.completed ? (
+                            <BsCheckCircle className="me-1" />
+                        ) : (
+                            <BsHourglassSplit className="me-1" />
+                        )}
+                        {task.completed ? 'Completed' : 'Pending'}
+                    </Badge>
+                </td>
+                <td className="text-center">
+                    <Stack direction="horizontal" gap={2} className="justify-content-center">
+                        <Button
+                            size="sm"
+                            variant="success"
+                            onClick={() => toggleComplete(task)}
+                            disabled={task.completed}
+                            className="task-manager__action-btn"
+                        >
+                            ✅
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="outline-warning"
+                            onClick={() => handleEdit(task)}
+                            className="task-manager__action-btn"
+                        >
+                            <BsPencil />
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => confirmDelete(task)}
+                            className="task-manager__action-btn"
+                        >
+                            <BsTrash />
+                        </Button>
+                    </Stack>
+                </td>
+            </tr>
+        ))
+    ), [tasks, toggleComplete, handleEdit]);
 
     return (
         <Container className="my-5">
@@ -105,35 +194,7 @@ export default function TaskManager() {
                         <Card.Title className="task-manager__card-title">
                             {editingId ? '✏️ Edit Task' : '➕ Add Task'}
                         </Card.Title>
-                        <Form onSubmit={handleSubmit}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Title</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={title}
-                                    onChange={e => setTitle(e.target.value)}
-                                    placeholder="Enter task title"
-                                    required
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Description</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={description}
-                                    onChange={e => setDescription(e.target.value)}
-                                    placeholder="Enter task description"
-                                    required
-                                />
-                            </Form.Group>
-                            <Button
-                                type="submit"
-                                variant="primary"
-                                className="task-manager__submit-btn w-100"
-                            >
-                                {editingId ? 'Update Task' : 'Add Task'}
-                            </Button>
-                        </Form>
+                        {taskForm}
                     </Card>
                 </Col>
 
@@ -155,51 +216,7 @@ export default function TaskManager() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {tasks.map(task => (
-                                        <tr key={task.id} className={`task-manager__table-row ${task.completed ? 'task-manager__table-row--completed' : ''}`}>
-                                            <td>{task.title}</td>
-                                            <td>{task.description}</td>
-                                            <td>
-                                                <Badge bg={task.completed ? 'success' : 'warning'}>
-                                                    {task.completed ? (
-                                                        <BsCheckCircle className="me-1" />
-                                                    ) : (
-                                                        <BsHourglassSplit className="me-1" />
-                                                    )}
-                                                    {task.completed ? 'Completed' : 'Pending'}
-                                                </Badge>
-                                            </td>
-                                            <td className="text-center">
-                                                <Stack direction="horizontal" gap={2} className="justify-content-center">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="success"
-                                                        onClick={() => toggleComplete(task)}
-                                                        disabled={task.completed}
-                                                        className="task-manager__action-btn"
-                                                    >
-                                                        ✅
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline-warning"
-                                                        onClick={() => handleEdit(task)}
-                                                        className="task-manager__action-btn"
-                                                    >
-                                                        <BsPencil />
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline-danger"
-                                                        onClick={() => confirmDelete(task)}
-                                                        className="task-manager__action-btn"
-                                                    >
-                                                        <BsTrash />
-                                                    </Button>
-                                                </Stack>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {taskRows}
                                 </tbody>
                             </Table>
                         )}
