@@ -5,18 +5,17 @@ import com.example.demo.entity.Task;
 import com.example.demo.mapper.TaskMapper;
 import com.example.demo.repository.TaskRepo;
 import com.example.demo.vo.TaskVo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Slf4j
 @Repository
 public class TaskDaoImpl implements TaskDao {
 
     private final TaskRepo taskRepo;
     private final TaskMapper taskMapper;
-    private static final Logger log = LoggerFactory.getLogger(TaskDaoImpl.class);
 
     public TaskDaoImpl(
             TaskRepo taskRepo,

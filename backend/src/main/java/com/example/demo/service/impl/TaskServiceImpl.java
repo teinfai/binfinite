@@ -6,20 +6,19 @@ import com.example.demo.entity.Task;
 import com.example.demo.mapper.TaskMapper;
 import com.example.demo.service.TaskService;
 import com.example.demo.vo.TaskVo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class TaskServiceImpl implements TaskService {
 
     private final TaskDao taskDao;
     private final TaskMapper taskMapper;
-    private static final Logger log = LoggerFactory.getLogger(TaskServiceImpl.class);
 
     public TaskServiceImpl(
             TaskDao taskDao,
