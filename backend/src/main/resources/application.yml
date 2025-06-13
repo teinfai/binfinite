@@ -25,5 +25,6 @@ spring:
       path: /h2-console
 
 logging:
-  file:
-    path: logs
+  level:
+    com.example.demo: DEBUG
+    org.springframework: INFO

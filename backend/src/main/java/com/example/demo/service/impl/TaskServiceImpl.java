@@ -70,14 +70,18 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public TaskVo updateTask(Long id, TaskDto dto) {
-        Task TaskToUpdated = taskMapper.dtoToEntity(dto);
-        TaskToUpdated.setId(id);
+        log.debug(">> updateTask(id={}, dto={})", id, dto);
+        try {
+            Task taskToUpdate = taskMapper.dtoToEntity(dto);
+            taskToUpdate.setId(id);
 
-        TaskVo returnTask = taskDao.updateTask(TaskToUpdated);
-        log.info("<< updateTask updated {}", returnTask);
-
-        return returnTask;
-
+            TaskVo returnTask = taskDao.updateTask(taskToUpdate);
+            log.info("<< updateTask: successfully updated task {}", id);
+            return returnTask;
+        } catch (Exception e) {
+            log.error("Error updating task {}: {}", id, e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Override

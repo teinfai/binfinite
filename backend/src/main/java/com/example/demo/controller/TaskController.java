@@ -85,6 +85,9 @@ public class TaskController {
         } catch (org.springframework.dao.EmptyResultDataAccessException ex) {
             log.warn("Task to delete not found with id: {}", id);
             return ResponseEntity.notFound().build();
+        } catch (Exception ex) {
+            log.error("Unexpected error deleting task {}: {}", id, ex.getMessage(), ex);
+            throw ex;
         }
     }
 }

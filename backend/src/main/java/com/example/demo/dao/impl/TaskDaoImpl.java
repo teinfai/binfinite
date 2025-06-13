@@ -29,9 +29,14 @@ public class TaskDaoImpl implements TaskDao {
     @Override
     public TaskVo createTask(Task entity) {
         log.debug(">> createTask(entity={})", entity);
-        Task saved = taskRepo.save(entity);
-        log.info("<< createTask saved id={}, title={}", saved.getId(), saved.getTitle());
-        return taskMapper.entityToVo(saved);
+        try {
+            Task saved = taskRepo.save(entity);
+            log.info("<< createTask: saved successfully with id={}", saved.getId());
+            return taskMapper.entityToVo(saved);
+        } catch (Exception e) {
+            log.error("Error saving task: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Override
@@ -65,7 +70,12 @@ public class TaskDaoImpl implements TaskDao {
     @Override
     public void deleteById(Long id) {
         log.debug(">> deleteById(id={})", id);
-        taskRepo.deleteById(id);
-        log.info("<< deleteById completed for id={}", id);
+        try {
+            taskRepo.deleteById(id);
+            log.info("<< deleteById: successfully deleted task {}", id);
+        } catch (Exception e) {
+            log.error("Error deleting task {}: {}", id, e.getMessage(), e);
+            throw e;
+        }
     }
 }
